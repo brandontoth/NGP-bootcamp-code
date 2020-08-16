@@ -1,18 +1,33 @@
+% NGP short MATLAB project
+% 8/17/2020
+% NC Waller, F Czesak, M Dykstra, BA Toth
+% Script to look at the number of births in a given year and across years
+% Will output the total number of births for each day of the week across the
+% inputed years, the number of births for each day of the week for each individual
+% year, the total number of births across months of the year, and the total number
+% of births for each year
+
+% The following script is currently customized to look at the dataset: Birthdays_dataset.mat
+% which contains data from the years 2000-2014. In order for different yearly data to be run, 
+% the variables year_of_birth and yob_days would need to be adjusted to reflect the years of 
+% interest. Due to the organization of the data, line 64 would also need to be adjusted to
+% be one less than the earliest year in the dataset
+
 load('Birthdays_dataset.mat')
 
 %so tbh the way the data is organized is a little silly, so the first
 %order of business is going to be to make some new variables that make
 %the data a little easier to organize
 
-%to start, let's make a structure that has the data for every month of 
-%every year. That way, we can just index into the structure to get the
-%data that we want
-
 % just define some different variables for yearly, monthly, and daily data
 year_of_birth = ["y2000";"y2001";"y2002";"y2003";"y2004";"y2005";"y2006";"y2007";"y2008";"y2009";"y2010";"y2011";"y2012";"y2013";"y2014"];
 yob_days = ["yob2000";"yob2001";"yob2002";"yob2003";"yob2004";"yob2005";"yob2006";"yob2007";"yob2008";"yob2009";"yob2010";"yob2011";"yob2012";"yob2013";"yob2014"];
 month_of_birth = ["January";"February";"March";"April";"May";"June";"July";"August";"September";"October";"November";"December"];
 day_of_week = ["Monday";"Tuesday";"Wednesday";"Thursday";"Friday";"Saturday";"Sunday"];
+
+%to start, let's make a structure that has the data for every month of 
+%every year. That way, we can just index into the structure to get the
+%data that we want
 
 % Which day has the most births across years?
 
@@ -28,13 +43,13 @@ for i = 1:numel(year_of_birth) %set up a for loop to define all the years
         yearly_data.(getYear).(getDay) = birthday.(fn_birthday{i})(yearly_dates.(fn_yearly_dates{i}) == k);
         fn_yearly_data = fieldnames(yearly_data);
         fn_yearly_data_days = fieldnames(yearly_data.(getYear));
-        summary.(getYear).(getDay) = mean(yearly_data.(fn_yearly_data{i}).(fn_yearly_data_days{k}));
+        summary.(getYear).(getDay) = mean(yearly_data.(fn_yearly_data{i}).(fn_yearly_data_days{k})); %ngl Christian, it might be a little overkill for us to set up dynamic loops through structures and there's probably an easier method, but it's kind of cool amirite?
     end
 end
 
 % Which month tends to have the most births?
 
-for i = 1:numel(month_of_birth) 
+for i = 1:numel(month_of_birth) %we'll use a simplified version of the above code to get monthly, daily, and yearly data
     getMonth = month_of_birth(i);
     months.(getMonth) = Births(Month == i);
 end
@@ -47,21 +62,21 @@ end
 
 % all years
 for i = 1:numel(year_of_birth)
-    births_in_year(:,i) = sum(Births(Year == 1999+i));
-    yearly_sem(:,i) = std(Births(Year == 1999+i));
+    births_in_year(:,i) = sum(Births(Year == 1999+i)); %could've preallocated here but it's a small dataset so it probably wouldn't make much of a difference
 end
 
 %% Plot everything
-%yes, I probably could've written some code to plot in a loop but tbh I got
-%lazy and just decided to copy/paste all this to visualize the data ¯\_(?)_/¯
-figure(1)
+%yes, we probably could've written some code to plot in a loop but tbh that's a hassle
+%so we just decided to copy/paste all this to visualize the data ¯\_:)_/¯
+
+figure(1) %plot day of the week data for all years
 bar([sum(days.Monday) sum(days.Tuesday) sum(days.Wednesday) sum(days.Thursday) sum(days.Friday) sum(days.Saturday) sum(days.Sunday)]); 
 set(gca,'XTickLabel',["M";"T";"W";"T";"F";"S";"S"])
 xlabel('Day of birth')
 ylabel('Number of births')
 title("Births per day")
 
-figure(2)
+figure(2) %plot day of the week data for each year individually to see how things change over time
 subplot(3,5,1)
 bar([summary.y2000.Monday summary.y2000.Tuesday summary.y2000.Wednesday summary.y2000.Thursday summary.y2000.Friday summary.y2000.Saturday summary.y2000.Sunday])
 set(gca,'XTickLabel',["M";"T";"W";"T";"F";"S";"S"])
@@ -153,14 +168,14 @@ xlabel('Day of birth')
 ylabel('Number of births')
 title("2014")
 
-figure(3)
+figure(3) %plot total births in each year
 bar(births_in_year)
 set(gca,'XTickLabel',["2000";"2001";"2002";"2003";"2004";"2005";"2006";"2007";"2008";"2009";"2010";"2011";"2012";"2013";"2014"])
 xlabel('Year of birth')
 ylabel('Number of births')
 title('Births per year')
 
-figure(4)
+figure(4) %plot total births in each month for all the years combined
 bar([sum(months.January) sum(months.February) sum(months.March) sum(months.April) sum(months.May) sum(months.June) sum(months.July) sum(months.August) sum(months.September) sum(months.October) sum(months.November) sum(months.December)])
 set(gca,'XTickLabel',["J";"F";"M";"A";"M";"J";"J";"A";"S";"O";"N";"D"])
 xlabel('Month of the year')
